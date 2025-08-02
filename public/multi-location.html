@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>NZ Wind Farm Multi-Location Analysis</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        />
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-100 min-h-screen">
+        <div class="container mx-auto px-4 py-8">
+            <header class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                    NZ Wind Farm Multi-Location Analysis
+                </h1>
+                <p class="text-gray-600">
+                    Analyze strong wind events across all NZ wind farms
+                </p>
+            </header>
+
+            <!-- Event Period Selection -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold mb-4">
+                    Strong Wind Event Analysis
+                </h2>
+
+                <!-- Analysis Mode Toggle -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                        >Analysis Mode:</label
+                    >
+                    <div class="flex gap-4">
+                        <label class="flex items-center">
+                            <input
+                                type="radio"
+                                name="analysisMode"
+                                value="dateRange"
+                                checked
+                                class="mr-2"
+                            />
+                            <span>Date Range Analysis</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input
+                                type="radio"
+                                name="analysisMode"
+                                value="timePeriods"
+                                class="mr-2"
+                            />
+                            <span>Specific Time Periods Analysis</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Date Range Analysis Section -->
+                <div id="dateRangeSection">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                                >Start Date</label
+                            >
+                            <input
+                                type="date"
+                                id="startDate"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                                >End Date</label
+                            >
+                            <input
+                                type="date"
+                                id="endDate"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 mb-2"
+                                >Wind Threshold (km/h)</label
+                            >
+                            <input
+                                type="number"
+                                id="threshold"
+                                value="60"
+                                min="30"
+                                max="120"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div class="flex items-end">
+                            <button
+                                id="analyzeEventBtn"
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                Analyze Event
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Date Presets -->
+                    <div class="mt-4">
+                        <label
+                            class="block text-sm font-medium text-gray-700 mb-2"
+                            >Quick Date Presets:</label
+                        >
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                class="date-preset px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
+                                data-start="2024-01-15"
+                                data-end="2024-01-17"
+                            >
+                                Jan 15-17, 2024
+                            </button>
+                            <button
+                                class="date-preset px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
+                                data-start="2024-02-10"
+                                data-end="2024-02-12"
+                            >
+                                Feb 10-12, 2024
+                            </button>
+                            <button
+                                class="date-preset px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
+                                data-start="2024-03-05"
+                                data-end="2024-03-07"
+                            >
+                                Mar 5-7, 2024
+                            </button>
+                            <button
+                                class="date-preset px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
+                                data-start="2024-04-20"
+                                data-end="2024-04-22"
+                            >
+                                Apr 20-22, 2024
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Time Periods Analysis Section -->
+                <div id="timePeriodsSection" class="hidden">
+                    <div class="mb-4">
+                        <label
+                            class="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                            Paste Time Periods (from Strong Wind Periods page):
+                        </label>
+                        <textarea
+                            id="timePeriodsInput"
+                            rows="6"
+                            placeholder="Paste time periods here in format:&#10;2024-01-15 14:30 - 2024-01-15 18:45&#10;2024-01-16 09:15 - 2024-01-16 12:30&#10;..."
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                        ></textarea>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Format: YYYY-MM-DD HH:MM - YYYY-MM-DD HH:MM (one
+                            period per line)
+                        </p>
+                    </div>
+                    <div class="flex items-end">
+                        <button
+                            id="analyzeTimePeriodsBtn"
+                            class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                            Analyze Time Periods
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div
+                id="loading"
+                class="hidden bg-white rounded-lg shadow-md p-6 mb-6 text-center"
+            >
+                <div
+                    class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"
+                ></div>
+                <p class="text-gray-600">
+                    Analyzing wind event across all NZ wind farms...
+                </p>
+                <p class="text-sm text-gray-500 mt-2">
+                    This may take a few minutes for large date ranges
+                </p>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results" class="hidden">
+                <!-- Time Periods Analysis Results -->
+                <div id="timePeriodsResults" class="hidden">
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                            Time Periods Analysis Summary
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div class="text-center">
+                                <p
+                                    class="text-2xl font-bold text-blue-600"
+                                    id="totalTimePeriods"
+                                >
+                                    --
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    Total Time Periods
+                                </p>
+                            </div>
+                            <div class="text-center">
+                                <p
+                                    class="text-2xl font-bold text-green-600"
+                                    id="avgPeriodDuration"
+                                >
+                                    --
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    Avg Period Duration (hours)
+                                </p>
+                            </div>
+                            <div class="text-center">
+                                <p
+                                    class="text-2xl font-bold text-purple-600"
+                                    id="totalFarmsAnalyzed"
+                                >
+                                    --
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    Wind Farms Analyzed
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Time Periods Analysis Table -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                            Wind Farm Performance by Time Period
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full table-auto">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-4 py-2 text-left">
+                                            Wind Farm
+                                        </th>
+                                        <th
+                                            class="px-4 py-2 text-left"
+                                            id="timePeriodHeaders"
+                                        >
+                                            <!-- Time period headers will be populated here -->
+                                        </th>
+                                        <th
+                                            class="px-4 py-2 text-left font-bold"
+                                        >
+                                            Overall Average
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="timePeriodsTable">
+                                    <!-- Time periods data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Range Analysis Results -->
+                <div id="dateRangeResults" class="hidden">
+                    <!-- Wind Farm Ranking -->
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                            Wind Farm Performance Ranking
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full table-auto">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-4 py-2 text-left">
+                                            Rank
+                                        </th>
+                                        <th class="px-4 py-2 text-left">
+                                            Wind Farm
+                                        </th>
+                                        <th class="px-4 py-2 text-left">
+                                            Max Wind Speed
+                                        </th>
+                                        <th class="px-4 py-2 text-left">
+                                            Avg Wind Speed
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rankingTable">
+                                    <!-- Ranking data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div
+                id="error"
+                class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6"
+            >
+                <p id="errorMessage"></p>
+            </div>
+        </div>
+
+        <script src="js/multi-location.js"></script>
+    </body>
+</html>

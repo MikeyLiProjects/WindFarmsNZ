@@ -1,0 +1,79 @@
+{
+    "windFarms": [
+        {
+            "name": "Flat Hill",
+            "lat": -46.583,
+            "lon": 168.283
+        },
+        {
+            "name": "Hau Nui",
+            "lat": -41.367,
+            "lon": 175.483
+        },
+        {
+            "name": "Harapaki",
+            "lat": -39.18389,
+            "lon": 176.69306
+        },
+        {
+            "name": "Kaiwera Downs",
+            "lat": -46.24139,
+            "lon": 169.05583
+        },
+        {
+            "name": "Mahinerangi",
+            "lat": -45.75,
+            "lon": 169.9
+        },
+        {
+            "name": "Mill Creek",
+            "lat": -41.217,
+            "lon": 174.733
+        },
+        {
+            "name": "Mt Stuart",
+            "lat": -46.067,
+            "lon": 169.767
+        },
+        {
+            "name": "Tararua",
+            "lat": -40.35,
+            "lon": 175.783
+        },
+        {
+            "name": "Te Āpiti",
+            "lat": -40.3,
+            "lon": 175.8
+        },
+        {
+            "name": "Te Rere Hau",
+            "lat": -40.383,
+            "lon": 175.717
+        },
+        {
+            "name": "Te Uku",
+            "lat": -37.883,
+            "lon": 174.967
+        },
+        {
+            "name": "Turitea",
+            "lat": -40.44111,
+            "lon": 175.67139
+        },
+        {
+            "name": "Waipipi",
+            "lat": -39.783,
+            "lon": 174.55
+        },
+        {
+            "name": "Project West Wind",
+            "lat": -41.283,
+            "lon": 174.667
+        },
+        {
+            "name": "White Hill",
+            "lat": -45.75,
+            "lon": 168.267
+        }
+    ]
+}
